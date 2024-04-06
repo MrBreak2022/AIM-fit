@@ -1,0 +1,54 @@
+<!-- chatbot/templates/chatbot/chat.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+</head>
+<body>
+    <h1>Chat with the Bot</h1>
+    <div id="chat-container">
+        <div id="chat-box"></div>
+        <form id="chat-form">
+            <input type="text" id="question" placeholder="Enter your question...">
+            <button type="submit">Send</button>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#chat-form').submit(function(e) {
+                e.preventDefault();
+                var question = $('#question').val().trim();
+                if (question === '') return;
+                
+                $('#chat-box').append('<p><strong>You:</strong> ' + question + '</p>');
+                $('#question').val('');
+                scrollToBottom();
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/chatbot/',
+                    data: {
+                        'question': question,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    success: function(response) {
+                        $('#chat-box').append('<p><strong>Bot:</strong> ' + response.response + '</p>');
+                        scrollToBottom();
+                    },
+                    error: function(xhr, errmsg, err) {
+                        console.log(xhr.status + ": " + xhr.responseText);
+                    }
+                });
+            });
+
+            function scrollToBottom() {
+                $('#chat-box').scrollTop($('#chat-box')[0].scrollHeight);
+            }
+        });
+    </script>
+</body>
+</html>
