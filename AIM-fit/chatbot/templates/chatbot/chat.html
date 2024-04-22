@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIM-fit</title>
+
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #1f1f1f;
+            color: #c0c0c0;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Sticky navbar styles */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #333;
+            padding: 10px 0;
+            text-align: left;
+            z-index: 1000; /* Ensure the navbar stays on top of other content */
+        }
+
+        .navbar h1 {
+            margin: 0;
+            color: #fff;
+        }
+    
+        #chat-container {
+            max-width: 800px;
+            margin: 60px auto 20px; /* Adjust margin to account for the height of the sticky navbar */
+            padding: 20px;
+            background-color: #222;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        #chat-form {
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+
+        #chat-form input[type="text"],
+        #chat-form button {
+            padding: 10px;
+            margin-bottom: 10px;
+            width: calc(100% - 20px);
+            box-sizing: border-box;
+            background-color: #333;
+            border: none;
+            color: #c0c0c0;
+            font-size: 16px;
+        }
+
+        #chat-form input[type="text"]::placeholder {
+            color: #c0c0c0;
+        }
+
+        #chat-form button {
+            background-color: #007fff;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #chat-form button:hover {
+            background-color: #0056b3;
+        }
+
+        #chat-box {
+            padding: 20px;
+            margin-top: 20px;
+            background-color: #333;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+
+        #chat-box p {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #1f1f1f;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        #chat-box p strong {
+            color: #007fff;
+        }
+
+        output {
+            background-color: #333;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+    </style>
+    
+    
+</head>
+<body>
+    <!-- Sticky navbar -->
+    <div class="navbar">
+        <h1>Enclave AI</h1>
+    </div>
+
+    <div id="chat-container">
+        <div id="chat-box">
+            <h2>Output</h2>
+        </div>
+        <form id="chat-form">
+            <input type="text" id="question" placeholder="Enter your question..." autocomplete="off">
+            <button type="submit">Send</button>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#chat-form').submit(function(e) {
+                e.preventDefault();
+                var question = $('#question').val().trim();
+                if (question === '') return;
+                
+                $('#chat-box').append('<p><strong>You:</strong> ' + question + '</p>');
+                $('#question').val('');
+                scrollToBottom();
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/chatbot/',
+                    data: {
+                        'question': question,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    success: function(response) {
+                        $('#chat-box').append('<p><strong>Bot:</strong> ' + response.response + '</p>');
+                        scrollToBottom();
+                    },
+                    error: function(xhr, errmsg, err) {
+                        console.log(xhr.status + ": " + xhr.responseText);
+                    }
+                });
+            });
+
+            function scrollToBottom() {
+                $('#chat-box').scrollTop($('#chat-box')[0].scrollHeight);
+            }
+        });
+    </script>
+</body>
+</html>
